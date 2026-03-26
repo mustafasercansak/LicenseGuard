@@ -132,6 +132,11 @@ LicenseGuard/
 
 > `lg-config.json` ve üretilen `*.html` raporları `.gitignore` ile hariç tutulmuştur.
 
+## Yazar
+
+**Mustafa Sercan Sak**
+[GitHub](https://github.com/mustafasercansak) · [LinkedIn](https://www.linkedin.com/in/mustafa-sercan-sak-30190684/)
+
 ---
 
 ## English
@@ -189,3 +194,10 @@ cd LicenseGuard
 ### License
 
 MIT © 2026 Mustafa Sercan Sak
+
+---
+
+### Author
+
+**Mustafa Sercan Sak**
+[GitHub](https://github.com/mustafasercansak) · [LinkedIn](https://www.linkedin.com/in/mustafa-sercan-sak-30190684/)
