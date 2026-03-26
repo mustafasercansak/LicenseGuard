@@ -23,7 +23,7 @@ Kurumsal Windows ortamlarında yüklü yazılımları tarayarak lisans uyumlulu�
 ## Kurulum
 
 ```powershell
-git clone https://github.com/kullaniciadi/LicenseGuard.git
+git clone https://github.com/mustafasercansak/LicenseGuard.git
 cd LicenseGuard
 ```
 
