@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"& { $errors = $null; [System.Management.Automation.Language.Parser]::ParseFile\\(''c:\\\\projects\\\\policy\\\\LicenseGuard.ps1'', [ref]$null, [ref]$errors\\); if \\($errors.Count -gt 0\\) { $errors | ForEach-Object { ''HATA satir '' + $_.Extent.StartLineNumber + '': '' + $_.Message } } else { ''Syntax OK - hata yok'' } }\")",
+      "Bash(grep -v \"^--$\")"
+    ]
+  }
+}
