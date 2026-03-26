@@ -1,0 +1,33 @@
+{
+  "_comment": "LicenseGuard Config — Copy this file to lg-config.json and fill in your values",
+
+  "WarnDaysBeforeExpiry": 30,
+
+  "FlexLM": [
+    {
+      "Name": "MATLAB",
+      "Server": "27000@license-server01"
+    },
+    {
+      "Name": "ANSYS",
+      "Server": "1055@ansys-lic.corp.local"
+    }
+  ],
+
+  "SaaS": [
+    {
+      "Name": "GitHub API",
+      "Endpoint": "https://api.github.com/rate_limit",
+      "Header": "Authorization",
+      "Key": "Bearer ghp_XXXXXXXXXXXXXXXXXXXX",
+      "ExpectStatus": 200
+    },
+    {
+      "Name": "Custom Internal API",
+      "Endpoint": "https://api.yourcompany.com/health",
+      "Header": "X-API-Key",
+      "Key": "your-api-key-here",
+      "ExpectStatus": 200
+    }
+  ]
+}

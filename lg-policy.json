@@ -1,0 +1,813 @@
+{
+  "_comment": "LicenseGuard Policy — Kurumsal kullanım uyumluluk kuralları",
+  "_version": "1.0",
+  "rules": [
+
+    {
+      "id": "IDE-001",
+      "category": "IDE",
+      "pattern": "Visual Studio Community",
+      "matchType": "contains",
+      "status": "PROHIBITED",
+      "reason": "VS Community ticari kullanım için lisanslı değil (250+ çalışan veya $1M+ ciro).",
+      "alternative": "Visual Studio Professional/Enterprise veya VS Code (MIT lisanslı)",
+      "referenceUrl": "https://visualstudio.microsoft.com/license-terms/vs2022-ga-community/"
+    },
+    {
+      "id": "IDE-002",
+      "category": "IDE",
+      "pattern": "JetBrains Rider",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Rider ticari kullanım için ücretli lisans gerektirir.",
+      "alternative": "Kurumsal lisans satın alın veya VS Code + C# Dev Kit kullanın",
+      "referenceUrl": "https://www.jetbrains.com/rider/buy/"
+    },
+    {
+      "id": "IDE-003",
+      "category": "IDE",
+      "pattern": "IntelliJ IDEA Community",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Community Edition Apache 2.0 lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": "https://www.jetbrains.com/idea/download/"
+    },
+    {
+      "id": "IDE-004",
+      "category": "IDE",
+      "pattern": "PyCharm Community",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Apache 2.0 lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "IDE-005",
+      "category": "IDE",
+      "pattern": "Visual Studio Code",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "MIT lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "IDE-006",
+      "category": "IDE",
+      "pattern": "Sublime Text",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Ticari kullanım için lisans gerekli; değerlendirme amaçlı ücretsiz kullanılabilir.",
+      "alternative": "VS Code veya lisans satın alın",
+      "referenceUrl": "https://www.sublimetext.com/buy"
+    },
+    {
+      "id": "IDE-007",
+      "category": "IDE",
+      "pattern": "Notepad++",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "ARC-001",
+      "category": "Arşiv",
+      "pattern": "WinRAR",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "WinRAR ticari kullanım için lisans gerektiriyor; trial süresi dolsa da çalışmaya devam eder ama lisanssız kullanım lisans ihlali.",
+      "alternative": "7-Zip (LGPL, ücretsiz) veya kurumsal WinRAR lisansı",
+      "referenceUrl": "https://www.win-rar.com/buy-winrar.html"
+    },
+    {
+      "id": "ARC-002",
+      "category": "Arşiv",
+      "pattern": "7-Zip",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "LGPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "ARC-003",
+      "category": "Arşiv",
+      "pattern": "Bandizip",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Bandizip 7.x ticari kullanımda ücretli. Ücretsiz sürüm yalnızca bireysel kullanım.",
+      "alternative": "7-Zip veya lisans satın alın",
+      "referenceUrl": "https://en.bandisoft.com/bandizip/"
+    },
+
+    {
+      "id": "SSH-001",
+      "category": "Uzak Bağlantı",
+      "pattern": "PuTTY",
+      "matchType": "startsWith",
+      "status": "ALLOWED",
+      "reason": "MIT lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "SSH-002",
+      "category": "Uzak Bağlantı",
+      "pattern": "WinSCP",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "SSH-003",
+      "category": "Uzak Bağlantı",
+      "pattern": "mRemoteNG",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "SSH-004",
+      "category": "Uzak Bağlantı",
+      "pattern": "MobaXterm",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "MobaXterm Home ücretsiz, Professional kurumsal kullanım için ücretli.",
+      "alternative": "mRemoteNG + PuTTY veya MobaXterm Professional lisansı",
+      "referenceUrl": "https://mobaxterm.mobatek.net/buy.html"
+    },
+    {
+      "id": "SSH-005",
+      "category": "Uzak Bağlantı",
+      "pattern": "SecureCRT",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Ticari lisans gerekli.",
+      "alternative": "PuTTY veya Windows Terminal",
+      "referenceUrl": null
+    },
+
+    {
+      "id": "API-001",
+      "category": "API / DB",
+      "pattern": "Postman",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Bireysel ve küçük ekip (≤3 kişi) kullanımında ücretsiz plan yeterli; 3+ kişi ekip özellikleri için ücretli plan gerekebilir.",
+      "alternative": null,
+      "referenceUrl": "https://www.postman.com/pricing/"
+    },
+    {
+      "id": "API-002",
+      "category": "API / DB",
+      "pattern": "DBeaver",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Community Edition Apache 2.0 lisanslı.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "API-003",
+      "category": "API / DB",
+      "pattern": "TablePlus",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Ücretsiz sürüm 2 açık tab / 2 bağlantı ile sınırlı; ticari kullanım için lisans önerilir.",
+      "alternative": "DBeaver Community veya lisans satın alın",
+      "referenceUrl": "https://tableplus.com/pricing"
+    },
+    {
+      "id": "API-004",
+      "category": "API / DB",
+      "pattern": "HeidiSQL",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "MED-001",
+      "category": "Medya / Ofis",
+      "pattern": "VLC",
+      "matchType": "startsWith",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "MED-002",
+      "category": "Medya / Ofis",
+      "pattern": "LibreOffice",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "MPL 2.0 lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "MED-003",
+      "category": "Medya / Ofis",
+      "pattern": "Microsoft Office",
+      "matchType": "startsWith",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Microsoft 365 / Office için kurumsal lisans gerekli.",
+      "alternative": "LibreOffice veya Microsoft 365 Business aboneliği",
+      "referenceUrl": null
+    },
+    {
+      "id": "MED-004",
+      "category": "Medya / Ofis",
+      "pattern": "Adobe",
+      "matchType": "startsWith",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Adobe ürünleri ticari kullanım için abonelik/lisans gerektirir.",
+      "alternative": "GIMP (fotoğraf), Inkscape (vektör), DaVinci Resolve (video)",
+      "referenceUrl": null
+    },
+    {
+      "id": "MED-005",
+      "category": "Medya / Ofis",
+      "pattern": "Winamp",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Winamp 2024+ sürümleri ticari kullanımda lisans gerektiriyor.",
+      "alternative": "VLC",
+      "referenceUrl": null
+    },
+    {
+      "id": "MED-006",
+      "category": "Medya / Ofis",
+      "pattern": "GIMP",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "MED-007",
+      "category": "Medya / Ofis",
+      "pattern": "Inkscape",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "MED-008",
+      "category": "Medya / Ofis",
+      "pattern": "Blender",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma ve render çıktılarına açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "MED-009",
+      "category": "Medya / Ofis",
+      "pattern": "HandBrake",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "MED-010",
+      "category": "Medya / Ofis",
+      "pattern": "Audacity",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "CONT-001",
+      "category": "Konteyner / DevOps",
+      "pattern": "Docker Desktop",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "250+ çalışan veya 10M$+ cirosu olan şirketlerde ticari lisans zorunlu (Docker Business).",
+      "alternative": "Rancher Desktop (Apache 2.0, ücretsiz) veya Docker Desktop lisans satın alın",
+      "referenceUrl": "https://www.docker.com/pricing/"
+    },
+    {
+      "id": "CONT-002",
+      "category": "Konteyner / DevOps",
+      "pattern": "VMware Workstation",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Broadcom, Mayıs 2024'ten itibaren VMware Workstation Pro'yu kişisel ve ticari kullanım için ücretsiz yaptı. Broadcom hesabı ile indirilebilir.",
+      "alternative": null,
+      "referenceUrl": "https://blogs.vmware.com/workstation/2024/05/vmware-workstation-pro-now-available-free-for-personal-use.html"
+    },
+    {
+      "id": "CONT-003",
+      "category": "Konteyner / DevOps",
+      "pattern": "VirtualBox",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "VirtualBox base paketi GPL lisanslı, ticari kullanıma açık. Extension Pack kullanılıyorsa lisans kontrol edin.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "CONT-004",
+      "category": "Konteyner / DevOps",
+      "pattern": "Rancher Desktop",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Apache 2.0 lisanslı, Docker Desktop'a ücretsiz alternatif.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "CONT-005",
+      "category": "Konteyner / DevOps",
+      "pattern": "Vagrant",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "BSL 1.1 lisanslı; geliştirme ortamı için ücretsiz kullanılabilir.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "VCS-001",
+      "category": "Versiyon Kontrol",
+      "pattern": "GitKraken",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "GitKraken ticari kullanım için Pro/Teams lisansı gerektirir.",
+      "alternative": "Sourcetree (ücretsiz) veya GitHub Desktop (MIT)",
+      "referenceUrl": "https://www.gitkraken.com/pricing"
+    },
+    {
+      "id": "VCS-002",
+      "category": "Versiyon Kontrol",
+      "pattern": "Sourcetree",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Atlassian Sourcetree ücretsiz ve ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "VCS-003",
+      "category": "Versiyon Kontrol",
+      "pattern": "TortoiseGit",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "VCS-004",
+      "category": "Versiyon Kontrol",
+      "pattern": "TortoiseSVN",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "COM-001",
+      "category": "İletişim",
+      "pattern": "Slack",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Slack Pro/Business gereklidir; ücretsiz plan mesaj geçmişini 90 günle sınırlar.",
+      "alternative": "Rocket.Chat (self-hosted, açık kaynak) veya Slack Pro lisansı",
+      "referenceUrl": "https://slack.com/pricing"
+    },
+    {
+      "id": "COM-002",
+      "category": "İletişim",
+      "pattern": "Zoom",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Zoom ücretsiz plan 40 dakika sınırlıdır; kurumsal kullanım için Pro/Business lisansı gerekli.",
+      "alternative": "Microsoft Teams (M365 ile ücretsiz) veya Zoom Pro lisansı",
+      "referenceUrl": "https://zoom.us/pricing"
+    },
+    {
+      "id": "COM-003",
+      "category": "İletişim",
+      "pattern": "Discord",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Temel kullanım ücretsiz; kurumsal iletişim için Slack önerilir.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "COM-004",
+      "category": "İletişim",
+      "pattern": "Telegram",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Ücretsiz ve açık protokol; kurumsal veri paylaşımında dikkatli olun.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "SEC-001",
+      "category": "Güvenlik / Parola",
+      "pattern": "Wireshark",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık. Yetkilendirilmemiş ağlarda kullanmayın.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "SEC-002",
+      "category": "Güvenlik / Parola",
+      "pattern": "KeePass",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı parola yöneticisi, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "SEC-003",
+      "category": "Güvenlik / Parola",
+      "pattern": "Bitwarden",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "AGPL lisanslı, ücretsiz bireysel plan ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "SEC-004",
+      "category": "Güvenlik / Parola",
+      "pattern": "1Password",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "1Password ticari kullanım için Teams/Business aboneliği gerektirir.",
+      "alternative": "Bitwarden (AGPL, ücretsiz) veya KeePass (GPL)",
+      "referenceUrl": "https://1password.com/teams/pricing/"
+    },
+    {
+      "id": "SEC-005",
+      "category": "Güvenlik / Parola",
+      "pattern": "LastPass",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "LastPass Teams/Business aboneliği ücretlidir.",
+      "alternative": "Bitwarden (ücretsiz açık kaynak)",
+      "referenceUrl": null
+    },
+    {
+      "id": "SEC-006",
+      "category": "Güvenlik / Parola",
+      "pattern": "Nmap",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık. Yetkilendirilmemiş ağlarda kullanmayın.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "NET-001",
+      "category": "Ağ / Transfer",
+      "pattern": "FileZilla",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "NET-002",
+      "category": "Ağ / Transfer",
+      "pattern": "WireGuard",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "MIT/GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "NET-003",
+      "category": "Ağ / Transfer",
+      "pattern": "OpenVPN",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı Community Edition ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "NET-004",
+      "category": "Ağ / Transfer",
+      "pattern": "ngrok",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Ücretsiz plan kısıtlıdır (1 agent, geçici URL); kurumsal kullanım için ücretli plan gerekir.",
+      "alternative": "Cloudflare Tunnel (ücretsiz) veya ngrok Pro",
+      "referenceUrl": "https://ngrok.com/pricing"
+    },
+    {
+      "id": "NET-005",
+      "category": "Ağ / Transfer",
+      "pattern": "Cyberduck",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "NET-006",
+      "category": "Ağ / Transfer",
+      "pattern": "Fiddler",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Fiddler Everywhere Free plan bireysel kullanıma açık; Classic sürüm ücretsiz.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "DES-001",
+      "category": "Tasarım",
+      "pattern": "Figma",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Figma Professional/Organization ekip özellikleri için ücretli; Starter plan 3 proje ile sınırlı.",
+      "alternative": "Penpot (MIT, self-hosted, ücretsiz) veya Figma Professional lisansı",
+      "referenceUrl": "https://www.figma.com/pricing/"
+    },
+    {
+      "id": "DES-002",
+      "category": "Tasarım",
+      "pattern": "Sketch",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Sketch ticari kullanım için yıllık lisans gerektirir.",
+      "alternative": "Figma veya Penpot (açık kaynak)",
+      "referenceUrl": "https://www.sketch.com/pricing/"
+    },
+    {
+      "id": "DES-003",
+      "category": "Tasarım",
+      "pattern": "draw.io",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Apache 2.0 lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "DES-004",
+      "category": "Tasarım",
+      "pattern": "diagrams.net",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Apache 2.0 lisanslı (draw.io'nun yeni adı), ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "PRD-001",
+      "category": "Üretkenlik / Not",
+      "pattern": "Obsidian",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Obsidian kurumsal/ticari kullanım için Commercial lisans gerektirir (kişisel kullanım ücretsiz).",
+      "alternative": "Logseq (AGPL, ücretsiz) veya Obsidian Commercial lisansı",
+      "referenceUrl": "https://obsidian.md/pricing"
+    },
+    {
+      "id": "PRD-002",
+      "category": "Üretkenlik / Not",
+      "pattern": "Typora",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Typora tek seferlik ücretli uygulama; ticari kullanım için satın alınmalı.",
+      "alternative": "VS Code + Markdown uzantısı veya Zettlr (GPL, ücretsiz)",
+      "referenceUrl": "https://typora.io/#purchase"
+    },
+    {
+      "id": "PRD-003",
+      "category": "Üretkenlik / Not",
+      "pattern": "Notion",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Notion Plus/Business ekip özellikleri için ücretli; ücretsiz plan kişisel kullanım için yeterli.",
+      "alternative": "Logseq veya Obsidian (bireysel ücretsiz)",
+      "referenceUrl": "https://www.notion.so/pricing"
+    },
+    {
+      "id": "PRD-004",
+      "category": "Üretkenlik / Not",
+      "pattern": "Logseq",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "AGPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "BRW-001",
+      "category": "Tarayıcı",
+      "pattern": "Firefox",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "MPL 2.0 lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "BRW-002",
+      "category": "Tarayıcı",
+      "pattern": "Brave",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "MPL 2.0 lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "BRW-003",
+      "category": "Tarayıcı",
+      "pattern": "Opera",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Freeware; bireysel ve kurumsal kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "TRM-001",
+      "category": "Terminal",
+      "pattern": "Windows Terminal",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "MIT lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "TRM-002",
+      "category": "Terminal",
+      "pattern": "ConEmu",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "BSD lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "TRM-003",
+      "category": "Terminal",
+      "pattern": "Hyper",
+      "matchType": "exact",
+      "status": "ALLOWED",
+      "reason": "MIT lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+
+    {
+      "id": "AI-001",
+      "category": "AI Araçları",
+      "pattern": "GitHub Copilot",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Copilot Business/Enterprise kurumsal kullanım için ücretli; bireysel plan ayrı.",
+      "alternative": "Codeium (ücretsiz bireysel) veya Copilot Business lisansı",
+      "referenceUrl": "https://github.com/features/copilot#pricing"
+    },
+    {
+      "id": "AI-002",
+      "category": "AI Araçları",
+      "pattern": "Cursor",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Cursor Pro/Business ticari kullanım için ücretli; ücretsiz plan sınırlı istek hakkı içerir.",
+      "alternative": "VS Code + Codeium (ücretsiz) veya Cursor Pro lisansı",
+      "referenceUrl": "https://cursor.com/pricing"
+    },
+    {
+      "id": "AI-003",
+      "category": "AI Araçları",
+      "pattern": "Codeium",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Bireysel kullanım ücretsiz; Teams özellikleri için ücretli.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "AI-004",
+      "category": "AI Araçları",
+      "pattern": "Tabnine",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Tabnine Enterprise kurumsal kullanım için ücretli.",
+      "alternative": "Codeium (ücretsiz bireysel)",
+      "referenceUrl": "https://www.tabnine.com/pricing"
+    },
+
+    {
+      "id": "DEV-001",
+      "category": "Geliştirme Araçları",
+      "pattern": "WebStorm",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "JetBrains WebStorm ticari kullanım için ücretli lisans gerektirir.",
+      "alternative": "VS Code (MIT, ücretsiz)",
+      "referenceUrl": "https://www.jetbrains.com/webstorm/buy/"
+    },
+    {
+      "id": "DEV-002",
+      "category": "Geliştirme Araçları",
+      "pattern": "DataGrip",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "JetBrains DataGrip ticari kullanım için ücretli lisans gerektirir.",
+      "alternative": "DBeaver Community (Apache 2.0, ücretsiz)",
+      "referenceUrl": "https://www.jetbrains.com/datagrip/buy/"
+    },
+    {
+      "id": "DEV-003",
+      "category": "Geliştirme Araçları",
+      "pattern": "Beyond Compare",
+      "matchType": "contains",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Ticari kullanım için lisans satın alınmalı.",
+      "alternative": "WinMerge (GPL, ücretsiz)",
+      "referenceUrl": "https://www.scootersoftware.com/shop"
+    },
+    {
+      "id": "DEV-004",
+      "category": "Geliştirme Araçları",
+      "pattern": "WinMerge",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "GPL lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "DEV-005",
+      "category": "Geliştirme Araçları",
+      "pattern": "Insomnia",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Apache 2.0 lisanslı, ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "DEV-006",
+      "category": "Geliştirme Araçları",
+      "pattern": "Bruno",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "MIT lisanslı, ticari kullanıma açık. Postman'e iyi alternatif.",
+      "alternative": null,
+      "referenceUrl": null
+    },
+    {
+      "id": "DEV-007",
+      "category": "Geliştirme Araçları",
+      "pattern": "Fiddler",
+      "matchType": "contains",
+      "status": "ALLOWED",
+      "reason": "Fiddler Classic ücretsiz; ticari kullanıma açık.",
+      "alternative": null,
+      "referenceUrl": null
+    }
+
+  ]
+}

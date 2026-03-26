@@ -1,0 +1,13 @@
+# Generated reports
+*.html
+!docs/*.html
+
+# Sensitive config (copy from lg-config.example.json)
+lg-config.json
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# PowerShell
+*.ps1xml
