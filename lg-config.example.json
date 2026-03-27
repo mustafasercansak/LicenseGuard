@@ -1,7 +1,20 @@
 {
-  "_comment": "LicenseGuard Config — Copy this file to lg-config.json and fill in your values",
+  "_comment": "LicenseGuard Config — lg-config.json olarak kopyalayin ve degerleri doldurun",
 
   "WarnDaysBeforeExpiry": 30,
+
+  "SnapshotPath": ".\\lg-snapshot.json",
+
+  "EolCheck": true,
+
+  "ScanBrowserExtensions": true,
+  "ScanVsCodeExtensions": true,
+  "ScanStartup": true,
+
+  "Whitelist": [
+    "InternalTool",
+    "CompanyApp"
+  ],
 
   "FlexLM": [
     {
@@ -29,5 +42,37 @@
       "Key": "your-api-key-here",
       "ExpectStatus": 200
     }
-  ]
+  ],
+
+  "Email": {
+    "SmtpServer": "smtp.company.com",
+    "Port": 587,
+    "UseSsl": true,
+    "From": "licenseguard@company.com",
+    "To": ["it-team@company.com", "manager@company.com"],
+    "Credential": {
+      "User": "licenseguard@company.com",
+      "Password": "your-smtp-password"
+    }
+  },
+
+  "Webhook": {
+    "Type": "teams",
+    "Url": "https://your-org.webhook.office.com/webhookb2/XXXX/IncomingWebhook/YYYY/ZZZZ"
+  },
+
+  "_comment_webhook_slack": "Slack icin Type: 'slack', Url: Slack Incoming Webhook URL",
+
+  "Jira": {
+    "BaseUrl": "https://your-org.atlassian.net",
+    "User": "jira-user@company.com",
+    "Token": "your-jira-api-token",
+    "Project": "IT",
+    "IssueType": "Bug"
+  },
+
+  "Branding": {
+    "CompanyName": "Acme Corp",
+    "PrimaryColor": "#3b82f6"
+  }
 }

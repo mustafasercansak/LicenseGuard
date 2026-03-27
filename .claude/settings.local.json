@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pwsh -NoProfile -File LicenseGuard.ps1 -ConsoleOnly -NoDelta -NoUpdateCheck)",
+      "Bash(pwsh -NoProfile -File LicenseGuard.ps1 -NoDelta -NoUpdateCheck -OutputPath \".\\\\test-report.html\")",
+      "Bash(grep -c \"BrandColor\\\\|BrandCompany\\\\|$brand\" \"c:/Users/sercan.sak/projects/LicenseGuard/test-report.html\")"
+    ]
+  }
+}
