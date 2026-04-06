@@ -1,3 +1,91 @@
+<#
+.SYNOPSIS
+    Enterprise license compliance scanner for Windows environments.
+
+.DESCRIPTION
+    LicenseGuard scans installed software, browser/VS Code extensions, startup
+    programs, and running processes. It checks findings against a customizable
+    policy (lg-policy.json) and generates a bilingual TR/EN HTML report.
+
+    Optional integrations: FlexLM license servers, SaaS/API key health checks,
+    SMTP email, Microsoft Teams/Slack webhooks, Jira ticket creation, and remote
+    machine scanning via WinRM.
+
+.PARAMETER ConfigPath
+    Path to the JSON configuration file. Defaults to .\lg-config.json.
+    Copy lg-config.example.json as a starting point.
+
+.PARAMETER OutputPath
+    Path for the generated HTML report. Defaults to .\license-report.html.
+
+.PARAMETER PolicyPath
+    Path to the policy rules JSON file. Defaults to .\lg-policy.json.
+
+.PARAMETER Lang
+    Report language. Accepted values: 'tr' (default) or 'en'.
+
+.PARAMETER ConsoleOnly
+    Skip HTML report generation; print results to the console only.
+
+.PARAMETER ExportCsv
+    Optional path to export results as a CSV file.
+
+.PARAMETER ExportJson
+    Optional path to export results as a JSON file.
+
+.PARAMETER SarifPath
+    Optional path to write a SARIF 2.1 security report (for CI/CD pipelines).
+
+.PARAMETER SendMail
+    Send the HTML report by email after scanning. Requires Email settings in
+    the config file.
+
+.PARAMETER ComputerName
+    Remote Windows machine name to scan via WinRM (Invoke-Command).
+
+.PARAMETER NoDelta
+    Disable comparison with the previous snapshot. No delta panel in the report.
+
+.PARAMETER TestPolicy
+    Validate policy rules without collecting any scan data. Useful in CI.
+
+.PARAMETER CheckSignatures
+    Enable digital signature verification for executable files found during scan.
+
+.PARAMETER NoUpdateCheck
+    Skip the online version check at startup.
+
+.PARAMETER CreateJiraIssues
+    Automatically create Jira issues for each policy violation found.
+    Requires Jira settings in the config file.
+
+.EXAMPLE
+    .\LicenseGuard.ps1
+    Run with defaults: Turkish report saved to .\license-report.html.
+
+.EXAMPLE
+    .\LicenseGuard.ps1 -Lang en -OutputPath "C:\Reports\scan.html"
+    English report saved to a custom path.
+
+.EXAMPLE
+    .\LicenseGuard.ps1 -ExportCsv .\results.csv -ExportJson .\results.json
+    Generate HTML report and also export CSV and JSON.
+
+.EXAMPLE
+    .\LicenseGuard.ps1 -SendMail -Lang en
+    Scan and email the report (SMTP config required in lg-config.json).
+
+.EXAMPLE
+    .\LicenseGuard.ps1 -ComputerName REMOTE-PC01
+    Scan a remote machine via WinRM.
+
+.EXAMPLE
+    .\LicenseGuard.ps1 -TestPolicy -ConsoleOnly -NoUpdateCheck
+    Validate policy rules in CI without scanning or network calls.
+
+.LINK
+    https://github.com/mustafasercansak/LicenseGuard
+#>
 param(
     [Parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][string]$ConfigPath  = '.\lg-config.json',
     [Parameter(Mandatory=$false)][ValidateNotNullOrEmpty()][string]$OutputPath  = '.\license-report.html',
@@ -71,6 +159,9 @@ $L = @{
         navProcess      = "Aktif Processler"
         navSignature    = "Imza"
         snapshotSaved   = "Snapshot kaydedildi:"
+        hdrOffice       = "Microsoft Office Lisans Durumu"
+        officeNotFound  = "Kurulu degil veya tespit edilemedi"
+        navOffice       = "Office"
         hdrBrowser      = "Tarayici Eklentileri Taramasi"
         hdrVsCode       = "VS Code Eklentileri"
         hdrStartup      = "Baslangi Programlari"
@@ -127,6 +218,9 @@ $L = @{
         navProcess      = "Running Processes"
         navSignature    = "Signature"
         snapshotSaved   = "Snapshot saved:"
+        hdrOffice       = "Microsoft Office License Status"
+        officeNotFound  = "Not installed or not detected"
+        navOffice       = "Office"
         hdrBrowser      = "Browser Extension Scan"
         hdrVsCode       = "VS Code Extensions"
         hdrStartup      = "Startup Programs"
@@ -250,7 +344,7 @@ function Get-RemoteSoftwareCache {
             )
             $today = Get-Date; $rows = @()
             foreach ($path in $regPaths) {
-                Get-ItemProperty $path 2>$null | Where-Object { $_.DisplayName } | ForEach-Object {
+                Get-ItemProperty $path 2>$null | Where-Object { $_.DisplayName -and -not $_.SystemComponent } | ForEach-Object {
                     $name    = $_.DisplayName
                     $version = if ($_.DisplayVersion) { $_.DisplayVersion } else { "-" }
                     $pub     = if ($_.Publisher) { $_.Publisher } else { "Unknown" }
@@ -299,7 +393,7 @@ function Get-InstalledSoftwareCache {
     )
     $today = Get-Date; $rows = @()
     foreach ($path in $regPaths) {
-        Get-ItemProperty $path 2>$null | Where-Object { $_.DisplayName } | ForEach-Object {
+        Get-ItemProperty $path 2>$null | Where-Object { $_.DisplayName -and -not $_.SystemComponent } | ForEach-Object {
             $name    = $_.DisplayName
             $version = if ($_.DisplayVersion) { $_.DisplayVersion } else { "-" }
             $pub     = if ($_.Publisher)      { $_.Publisher }      else { $L["publisherUnknown"] }
@@ -779,6 +873,94 @@ function Get-WindowsActivation {
     Write-Status "Windows Aktivasyon" $detail $mapped[1]
     $name = if ($Computer) { "[$Computer] Windows Aktivasyon" } else { "Windows Aktivasyon" }
     return @{ Module="WindowsActivation"; Name=$name; Status=$mapped[1]; Detail=$detail }
+}
+
+# ─────────────────────────────────────────────
+#  MODUL 1b: MICROSOFT OFFICE LISANS DURUMU
+# ─────────────────────────────────────────────
+function Get-OfficeLicenseStatus {
+    param([string]$Computer = "")
+    Write-Header ($L["hdrOffice"] + $(if ($Computer) { " [$Computer]" } else { "" }))
+    $rows = @()
+
+    # --- Yontem 1: ospp.vbs (Office 14/15/16) ---
+    $osppCandidates = @(
+        "C:\Program Files\Microsoft Office\Office16\ospp.vbs",
+        "C:\Program Files (x86)\Microsoft Office\Office16\ospp.vbs",
+        "C:\Program Files\Microsoft Office\Office15\ospp.vbs",
+        "C:\Program Files (x86)\Microsoft Office\Office15\ospp.vbs",
+        "C:\Program Files\Microsoft Office\Office14\ospp.vbs",
+        "C:\Program Files (x86)\Microsoft Office\Office14\ospp.vbs"
+    )
+    $ospp = $null
+    foreach ($p in $osppCandidates) { if (Test-Path $p) { $ospp = $p; break } }
+
+    if ($ospp -and -not $Computer) {
+        try {
+            $out = & cscript.exe //Nologo $ospp /dstatus 2>&1
+            $blocks = ($out -join "`n") -split "---Processing-"
+            foreach ($block in $blocks) {
+                if ($block -notmatch "LICENSE NAME") { continue }
+                $name       = if ($block -match "LICENSE NAME:\s*(.+)")            { $Matches[1].Trim() } else { "Microsoft Office" }
+                $statusLine = if ($block -match "LICENSE STATUS:\s*-*([^-\r\n]+)") { $Matches[1].Trim() } else { "" }
+                $graceMin   = if ($block -match "GRACE PERIOD REMAINING:\s*(\d+)") { [int]$Matches[1]   } else { 0 }
+
+                $st = if     ($statusLine -match "(?i)LICENSED")            { "OK"      }
+                      elseif ($statusLine -match "(?i)GRACE|NOTIFICATION")  { "WARN"    }
+                      else                                                   { "EXPIRED" }
+
+                $detail = $statusLine
+                if ($graceMin -gt 0) { $detail += " -- Kalan: $([math]::Round($graceMin / 1440, 1)) gun" }
+
+                Write-Status $name $detail $st
+                $rows += @{ Module = "OfficeLicense"; Name = $name; Status = $st; Detail = $detail }
+            }
+        } catch {
+            Write-Status "Office (ospp.vbs)" $_.Exception.Message "ERROR"
+        }
+    }
+
+    # --- Yontem 2: WMI fallback (uzak makine veya ospp bulunamadiysa) ---
+    if ($rows.Count -eq 0) {
+        try {
+            $cimParams = @{
+                Query = "SELECT Name, LicenseStatus, GracePeriodRemaining FROM SoftwareLicensingProduct WHERE PartialProductKey IS NOT NULL AND ApplicationID='0ff1ce15-a989-479d-af46-f275c6370663'"
+            }
+            if ($Computer) { $cimParams.ComputerName = $Computer }
+            $products = Get-CimInstance @cimParams
+
+            $statusMap = @{
+                0 = @("Lisanssiz", "EXPIRED")
+                1 = @("Lisansli",  "OK")
+                2 = @("OOBGrace",  "WARN")
+                3 = @("OOTGrace",  "WARN")
+                4 = @("NonGenuineGrace", "WARN")
+                5 = @("Bildirim",  "WARN")
+                6 = @("ExtendedGrace", "WARN")
+            }
+
+            if ($products) {
+                foreach ($p in @($products)) {
+                    $ls     = [int]$p.LicenseStatus
+                    $mapped = if ($statusMap.ContainsKey($ls)) { $statusMap[$ls] } else { @("Bilinmiyor", "WARN") }
+                    $detail = if ($p.GracePeriodRemaining -gt 0) {
+                        "$($mapped[0]) -- Kalan: $([math]::Round($p.GracePeriodRemaining / 1440, 1)) gun"
+                    } else { $mapped[0] }
+                    $pName = if ($p.Name) { $p.Name } else { "Microsoft Office" }
+                    Write-Status $pName $detail $mapped[1]
+                    $rows += @{ Module = "OfficeLicense"; Name = $pName; Status = $mapped[1]; Detail = $detail }
+                }
+            } else {
+                $msg = $L["officeNotFound"]
+                Write-Status "Microsoft Office" $msg "OK"
+                $rows += @{ Module = "OfficeLicense"; Name = "Microsoft Office"; Status = "OK"; Detail = $msg }
+            }
+        } catch {
+            Write-Status "Office (WMI)" $_.Exception.Message "ERROR"
+            $rows += @{ Module = "OfficeLicense"; Name = "Microsoft Office"; Status = "ERROR"; Detail = $_.Exception.Message }
+        }
+    }
+    return $rows
 }
 
 # ─────────────────────────────────────────────
@@ -1296,6 +1478,10 @@ footer{padding:.6rem 0;text-align:center;color:var(--tx3);font-size:.7rem;border
     <span class="nav-icon">&#x1F5A5;&#xFE0F;</span>
     <span>Windows</span>
   </div>
+  <div class="nav-item" onclick="filterMod('OfficeLicense',this)">
+    <span class="nav-icon">&#x1F4C4;</span>
+    <span data-i18n="navOffice">Office</span>
+  </div>
   <div class="nav-item" onclick="filterMod('Software',this)">
     <span class="nav-icon">&#x1F4E6;</span>
     <span data-i18n="navSoftware">Yazilimlar</span>
@@ -1750,6 +1936,8 @@ if ($ComputerName) {
             $data = Receive-Job $remJobs[$pc] -Wait -ErrorAction Stop
             if ($data) {
                 $allResults.Add(@{ Module="WindowsActivation"; Name="[$pc] Windows Aktivasyon"; Status=$data.WinStatus; Detail=$data.WinDetail })
+                $remOffR = Get-OfficeLicenseStatus -Computer $pc
+                if ($remOffR) { $remOffR | ForEach-Object { $allResults.Add($_) } }
                 $data.Software | ForEach-Object { $allResults.Add(@{ Module="Software"; Name="[$pc] $($_.Name)"; Status=$_.Status; Detail=$_.ExpireInfo }) }
             }
         } catch { Write-Host "  [ERROR] $pc : $($_.Exception.Message)" -ForegroundColor Red }
@@ -1761,6 +1949,7 @@ if ($ComputerName) {
 $swCache = @()
 if (-not $ComputerName) {
     $r1 = Get-WindowsActivation; if ($r1) { $allResults.Add($r1) }
+    $offR = Get-OfficeLicenseStatus; if ($offR) { $offR | ForEach-Object { $allResults.Add($_) } }
     $swCache = Get-InstalledSoftwareCache
     $r2 = Get-InstalledSoftwareAudit -Cache $swCache; if ($r2) { $r2 | ForEach-Object { $allResults.Add($_) } }
 

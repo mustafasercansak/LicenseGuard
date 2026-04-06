@@ -1,9 +1,14 @@
 # Generated reports
 *.html
 !docs/*.html
+lg-report.csv
+lg-report.json
 
 # Sensitive config (copy from lg-config.example.json)
 lg-config.json
+
+# Snapshot (machine-specific scan state)
+lg-snapshot.json
 
 # Windows
 Thumbs.db
@@ -11,3 +16,9 @@ Desktop.ini
 
 # PowerShell
 *.ps1xml
+
+# Editor
+.vscode/settings.json
+.idea/
+*.suo
+*.user

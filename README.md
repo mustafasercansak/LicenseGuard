@@ -156,7 +156,7 @@ A PowerShell tool that scans installed software on Windows machines, checks lice
 ### Quick Start
 
 ```powershell
-git clone https://github.com/yourusername/LicenseGuard.git
+git clone https://github.com/mustafasercansak/LicenseGuard.git
 cd LicenseGuard
 
 # Run with defaults (Turkish report)
