@@ -18,18 +18,19 @@ jobs:
         shell: pwsh
         run: |
           $policy = Get-Content lg-policy.json -Raw | ConvertFrom-Json
-          Write-Host "Policy rules loaded: $($policy.Count)"
+          $rules  = $policy.rules
+          Write-Host "Policy rules loaded: $($rules.Count)"
 
-          $ids = $policy | ForEach-Object { $_.id }
+          $ids = $rules | ForEach-Object { $_.id }
           $duplicates = $ids | Group-Object | Where-Object { $_.Count -gt 1 }
           if ($duplicates) {
             $duplicates | ForEach-Object { Write-Error "Duplicate policy ID: $($_.Name)" }
             exit 1
           }
 
-          $validStatuses  = @('ALLOWED','REQUIRES_LICENSE','PROHIBITED')
+          $validStatuses   = @('ALLOWED','REQUIRES_LICENSE','PROHIBITED')
           $validMatchTypes = @('contains','startsWith','exact','regex')
-          $invalid = $policy | Where-Object {
+          $invalid = $rules | Where-Object {
             $validStatuses  -notcontains $_.status    -or
             $validMatchTypes -notcontains $_.matchType -or
             [string]::IsNullOrWhiteSpace($_.id)       -or
@@ -40,7 +41,7 @@ jobs:
             exit 1
           }
 
-          Write-Host "All $($policy.Count) policy rules are valid."
+          Write-Host "All $($rules.Count) policy rules are valid."
 
       - name: Validate lg-config.example.json
         shell: pwsh
