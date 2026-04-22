@@ -1,0 +1,24 @@
+name: Publish to PowerShell Gallery
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate module manifest
+        shell: pwsh
+        run: Test-ModuleManifest -Path ./LicenseGuard/LicenseGuard.psd1
+
+      - name: Publish module
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PS_GALLERY }}
+        run: |
+          Publish-Module -Path ./LicenseGuard -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
