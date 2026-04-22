@@ -547,6 +547,8 @@ function Export-JsonReport {
 }
 
 function Send-MailReport {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '',
+        Justification = 'Password is read from a user-managed config file; callers are responsible for securing it.')]
     param([object]$EmailConfig, [string]$ReportPath, [string]$Summary)
     if (-not $EmailConfig) {
         Write-Host "  [WARN] Email konfig (lg-config.json -> Email) bulunamadi." -ForegroundColor Yellow
