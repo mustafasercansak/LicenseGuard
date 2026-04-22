@@ -3,6 +3,7 @@
 !docs/*.html
 lg-report.csv
 lg-report.json
+lg-snapshot.json
 
 # Sensitive config (copy from lg-config.example.json)
 lg-config.json
