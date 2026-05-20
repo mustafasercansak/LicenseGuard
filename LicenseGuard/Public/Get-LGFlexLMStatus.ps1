@@ -17,7 +17,8 @@ function Get-LGFlexLMStatus {
         return @()
     }
 
-    $lmutil = (Get-Command 'lmutil.exe' -ErrorAction SilentlyContinue)?.Source
+    $lmutilCmd = Get-Command 'lmutil.exe' -ErrorAction SilentlyContinue
+    $lmutil    = if ($null -ne $lmutilCmd) { $lmutilCmd.Source } else { $null }
     if (-not $lmutil) {
         $candidates = @(
             'C:\Program Files\FLEXlm\lmutil.exe'

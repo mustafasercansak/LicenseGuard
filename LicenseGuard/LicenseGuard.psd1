@@ -1,5 +1,5 @@
 @{
-    ModuleVersion     = '3.0.0'
+    ModuleVersion     = '3.1.0'
     GUID              = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
     Author            = 'Mustafa Sercan Sak'
     CompanyName       = 'mustafasercansak'
@@ -13,6 +13,8 @@
         'Get-LGWindowsActivation'
         'Get-LGOfficeLicense'
         'Get-LGInstalledSoftware'
+        'Get-LGProjectDependencies'
+        'Get-LGBinaryLicenseAudit'
         'Get-LGEolStatus'
         'Get-LGFlexLMStatus'
         'Get-LGSaaSStatus'
@@ -34,6 +36,7 @@
         'Save-LGSnapshot'
         'Get-LGDelta'
         'Invoke-LicenseGuard'
+        'Register-LGScheduledTask'
     )
 
     CmdletsToExport   = @()
@@ -42,10 +45,10 @@
 
     PrivateData = @{
         PSData = @{
-            Tags         = @('License', 'Compliance', 'Security', 'Audit', 'ActiveDirectory', 'Windows', 'Enterprise')
+            Tags         = @('License', 'Compliance', 'Security', 'Audit', 'ActiveDirectory', 'AssetManagement', 'Windows', 'Enterprise')
             ProjectUri   = 'https://github.com/mustafasercansak/LicenseGuard'
+            ReleaseNotes = 'v3.1.0: Added project dependency, binary artifact, SBOM, and build output license auditing with stronger policy classification.'
             LicenseUri   = 'https://github.com/mustafasercansak/LicenseGuard/blob/master/LICENSE'
-            ReleaseNotes = 'v3.0: Converted to module. Added AD integration, parallel multi-machine scan, Pester tests.'
         }
     }
 }

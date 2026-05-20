@@ -1,0 +1,44 @@
+name: License policy rule
+description: Request a new license rule or report a policy classification issue.
+title: "[Policy]: "
+labels:
+  - policy
+body:
+  - type: input
+    id: license
+    attributes:
+      label: License or pattern
+      placeholder: "GPL-3.0, LGPL-2.1, BUSL-1.1, Unknown"
+    validations:
+      required: true
+  - type: dropdown
+    id: expected_status
+    attributes:
+      label: Expected status
+      options:
+        - ALLOWED
+        - REQUIRES_LICENSE
+        - PROHIBITED
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current behavior
+      description: Paste the relevant report row or policy result.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: Why should this license be allowed, warned, or prohibited?
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Sample package, binary, or SBOM component
+      render: text

@@ -7,7 +7,17 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) standardını ta
 
 ---
 
-## [3.0] — 2026-04-06
+## [3.1.0] - 2026-05-20
+
+### Eklendi
+- **Proje Bağımlılık Taraması (SCA)** (`Get-LGProjectDependencies`) — Node.js (`package.json`) ve .NET (`.csproj`) projelerini tarayarak kütüphane lisanslarını tespit eder.
+- **Derlenmiş Dosya Lisans Denetimi (Binary Audit)** (`Get-LGBinaryLicenseAudit`) — Derlenmiş `.exe`/`.dll` dosyalarının PE başlık bilgilerini, `.deps.json` bağımlılıklarını ve SBOM dosyalarını (CycloneDX/SPDX) analiz ederek lisans uyumluluğunu doğrular.
+- `lg-policy.json` içine `matchField` desteği eklendi. Artık kurallar sadece program ismine değil, kütüphanelerin lisans türüne (ör. `MIT`, `GPL`) göre de eşleştirilebilir.
+- `Invoke-LicenseGuard` için `-ProjectPath` parametresi eklendi. (Hem kaynak kodlarını hem derleme çıktılarını tarar)
+
+---
+
+## [3.0.0] — 2026-04-06
 
 ### Eklendi
 - **Microsoft Office lisans kontrolü** (`Get-OfficeLicenseStatus`) — `ospp.vbs` (Office 14/15/16) ve WMI fallback ile aktivasyon durumu ve kalan süreyi raporlar; `-ComputerName` ile uzak makineleri destekler; HTML raporda "Office" bölümünde gösterilir
@@ -71,7 +81,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [3.0] — 2026-04-06
+## [3.1.0] - 2026-05-20
+
+### Added
+- **Project Dependency Scan (SCA)** (`Get-LGProjectDependencies`) — Scans Node.js (`package.json`) and .NET (`.csproj`) projects to detect library licenses.
+- **Compiled File License Audit (Binary Audit)** (`Get-LGBinaryLicenseAudit`) — Audits compiled `.exe` and `.dll` files by analyzing PE metadata, `.deps.json` dependencies, and SBOM files (CycloneDX/SPDX) for licensing compliance.
+- Added `matchField` support to `lg-policy.json`, allowing rules to match by license type (e.g., `MIT`, `GPL`) instead of just the software name.
+- Added `-ProjectPath` parameter to `Invoke-LicenseGuard` to support scanning project dependencies and compiled outputs.
+
+---
+
+## [3.0.0] — 2026-04-06
 
 ### Added
 - **Microsoft Office license check** (`Get-OfficeLicenseStatus`) — queries `ospp.vbs` (Office 14/15/16) with WMI fallback; reports activation status and remaining grace period; supports remote machines via `-ComputerName`; shown in a dedicated "Office" nav section in the HTML report

@@ -30,7 +30,7 @@ function Send-LGMailReport {
             UseSsl     = [bool]$email.UseSsl
         }
         if ($ReportPath -and (Test-Path $ReportPath)) { $params.Attachments = $ReportPath }
-        if ($email.Credential?.User) {
+        if ($null -ne $email.Credential -and $null -ne $email.Credential.User) {
             $pw = ConvertTo-SecureString $email.Credential.Password -AsPlainText -Force
             $params.Credential = New-Object System.Management.Automation.PSCredential($email.Credential.User, $pw)
         }
@@ -104,7 +104,7 @@ function New-LGJiraIssues {
     $cfg    = Get-LGEffectiveConfig
     $jira   = if ($JiraConfig) { $JiraConfig } else { $cfg.Jira }
 
-    if (-not $jira?.BaseUrl) {
+    if ($null -eq $jira -or -not $jira.BaseUrl) {
         Write-Warning 'Jira config (lg-config.json -> Jira) not found.'
         return
     }

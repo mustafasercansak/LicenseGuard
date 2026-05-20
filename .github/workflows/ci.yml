@@ -1,66 +1,74 @@
-name: CI
+name: PowerShell CI
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+      - main
+      - updates
+      - 'feat/**'
+      - 'feature/**'
+      - 'fix/**'
+      - 'hotfix/**'
   pull_request:
-    branches: [master]
+    branches:
+      - master
+      - main
+      - updates
+
+permissions:
+  contents: read
 
 jobs:
-  validate:
-    name: Validate
+  test:
     runs-on: windows-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Validate lg-policy.json
+      - name: Validate module manifest
+        shell: pwsh
+        run: Test-ModuleManifest -Path .\LicenseGuard\LicenseGuard.psd1
+
+      - name: Validate policy JSON
         shell: pwsh
         run: |
-          $policy = Get-Content lg-policy.json -Raw | ConvertFrom-Json
-          $rules  = $policy.rules
+          $policy = Get-Content .\lg-policy.json -Raw | ConvertFrom-Json
+          $rules = $policy.rules
+          if (-not $rules -or $rules.Count -eq 0) {
+            throw "lg-policy.json does not contain any rules."
+          }
+
           Write-Host "Policy rules loaded: $($rules.Count)"
 
-          $ids = $rules | ForEach-Object { $_.id }
-          $duplicates = $ids | Group-Object | Where-Object { $_.Count -gt 1 }
+          $duplicates = $rules | ForEach-Object { $_.id } | Group-Object | Where-Object { $_.Count -gt 1 }
           if ($duplicates) {
             $duplicates | ForEach-Object { Write-Error "Duplicate policy ID: $($_.Name)" }
             exit 1
           }
 
-          $validStatuses   = @('ALLOWED','REQUIRES_LICENSE','PROHIBITED')
-          $validMatchTypes = @('contains','startsWith','exact','regex')
+          $validStatuses = @('ALLOWED', 'REQUIRES_LICENSE', 'PROHIBITED')
+          $validMatchTypes = @('contains', 'startsWith', 'exact', 'regex')
           $invalid = $rules | Where-Object {
-            $validStatuses  -notcontains $_.status    -or
+            $validStatuses -notcontains $_.status -or
             $validMatchTypes -notcontains $_.matchType -or
-            [string]::IsNullOrWhiteSpace($_.id)       -or
+            [string]::IsNullOrWhiteSpace($_.id) -or
             [string]::IsNullOrWhiteSpace($_.pattern)
           }
           if ($invalid) {
-            $invalid | ForEach-Object { Write-Error "Invalid rule: $($_.id) — status=$($_.status) matchType=$($_.matchType)" }
+            $invalid | ForEach-Object { Write-Error "Invalid rule: $($_.id) status=$($_.status) matchType=$($_.matchType)" }
             exit 1
           }
 
           Write-Host "All $($rules.Count) policy rules are valid."
 
-      - name: Validate lg-config.example.json
+      - name: Validate example config JSON
         shell: pwsh
-        run: |
-          $cfg = Get-Content lg-config.example.json -Raw | ConvertFrom-Json
-          Write-Host "Config example parsed OK"
+        run: Get-Content .\lg-config.example.json -Raw | ConvertFrom-Json | Out-Null
 
-      - name: PSScriptAnalyzer
+      - name: Run Pester tests
         shell: pwsh
         run: |
-          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser -ErrorAction Stop
-          $results = Invoke-ScriptAnalyzer -Path LicenseGuard.ps1 -Severity Error
-          if ($results) {
-            $results | Format-Table -AutoSize
-            exit 1
+          if (-not (Get-Module Pester -ListAvailable | Where-Object Version -ge '5.0.0')) {
+            Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck
           }
-          Write-Host "PSScriptAnalyzer: no errors found."
-
-      - name: Syntax check — TestPolicy mode
-        shell: pwsh
-        run: |
-          .\LicenseGuard.ps1 -TestPolicy -ConsoleOnly -NoUpdateCheck
+          Invoke-Pester -Path .\LicenseGuard\Tests -Output Detailed
