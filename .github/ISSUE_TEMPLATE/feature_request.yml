@@ -1,0 +1,42 @@
+name: Feature request
+description: Suggest an improvement or new scanner/report feature.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What workflow or compliance gap should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should LicenseGuard do?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Windows inventory
+        - NPM/NuGet dependency audit
+        - Binary/build artifact audit
+        - SBOM parsing
+        - Policy rules
+        - HTML/CSV/JSON report
+        - CI/release
+        - Documentation
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example input or output
+      render: text

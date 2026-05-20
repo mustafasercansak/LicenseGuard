@@ -823,7 +823,7 @@
       "id": "LIB-002",
       "category": "Kütüphane Lisansı",
       "matchField": "license",
-      "pattern": "GPL|AGPL",
+      "pattern": "(^|[^A-Za-z])(AGPL|GPL)([^A-Za-z]|$)",
       "matchType": "regex",
       "status": "PROHIBITED",
       "reason": "GPL/AGPL gibi viral lisanslar ticari projelerde kodun açılmasını zorunlu kılabilir. Kesinlikle yasaktır.",
@@ -834,11 +834,44 @@
       "id": "LIB-003",
       "category": "Kütüphane Lisansı",
       "matchField": "license",
+      "pattern": "(^|[^A-Za-z])(LGPL|MPL|EPL|CDDL)([^A-Za-z]|$)",
+      "matchType": "regex",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Zayıf copyleft lisans tespit edildi. Kullanım şekline, linkleme/dağıtım modeline ve notice yükümlülüklerine göre hukuk/uyumluluk incelemesi gerekir.",
+      "alternative": "Mümkünse MIT, Apache-2.0, BSD veya ISC lisanslı alternatif kullanın",
+      "referenceUrl": null
+    },
+    {
+      "id": "LIB-004",
+      "category": "Kütüphane Lisansı",
+      "matchField": "license",
+      "pattern": "SSPL|BUSL|Commons Clause|PolyForm|Elastic License|Server Side Public License|Business Source License",
+      "matchType": "regex",
+      "status": "PROHIBITED",
+      "reason": "Kaynak-kodu-açık-gibi görünen fakat ticari kullanım/servis sunumu kısıtları içerebilen lisans tespit edildi. Kurumsal kullanımda yasaktır.",
+      "alternative": "OSI onaylı permissive lisanslı alternatif kullanın",
+      "referenceUrl": null
+    },
+    {
+      "id": "LIB-005",
+      "category": "Kütüphane Lisansı",
+      "matchField": "license",
       "pattern": "Unknown",
       "matchType": "exact",
       "status": "REQUIRES_LICENSE",
       "reason": "Bu kütüphanenin lisansı belirtilmemiş veya tespit edilemedi. Olası ihlallere karşı manuel olarak incelenmesi gerekiyor.",
       "alternative": "Kütüphanenin GitHub/npm sayfasını kontrol edip lisansını doğrulayın",
+      "referenceUrl": null
+    },
+    {
+      "id": "LIB-006",
+      "category": "Kütüphane Atıf Dosyası",
+      "matchField": "Detail",
+      "pattern": "MISSING PHYSICAL LICENSE FILE|MISSING LICENSE/ATTRIBUTION FILE",
+      "matchType": "regex",
+      "status": "REQUIRES_LICENSE",
+      "reason": "Paket veya build çıktısı için gerekli lisans/notice/third-party attribution dosyası bulunamadı. Dağıtımdan önce eklenmesi gerekir.",
+      "alternative": "LICENSE, NOTICE veya 3rdpartylicenses.txt dosyasını build çıktısına ekleyin",
       "referenceUrl": null
     }
   ]

@@ -91,6 +91,54 @@ Describe 'Invoke-LGPolicyCheck — severity mapping' {
     }
 }
 
+Describe 'Invoke-LGPolicyCheck — repository license policy' {
+    BeforeAll {
+        $script:repoPolicy = Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'lg-policy.json'
+    }
+
+    It 'marks GPL as prohibited without treating LGPL as GPL' {
+        $sw = @(
+            [PSCustomObject]@{ Name='StrongCopyleft'; Version='1.0'; Publisher='NPM'; License='GPL-3.0' }
+            [PSCustomObject]@{ Name='WeakCopyleft';   Version='1.0'; Publisher='NPM'; License='LGPL-3.0' }
+        )
+
+        $result = Invoke-LGPolicyCheck -PolicyPath $script:repoPolicy -SoftwareCache $sw
+
+        ($result | Where-Object { $_.Name -eq 'StrongCopyleft' }).PolicyStatus | Should -Be 'PROHIBITED'
+        ($result | Where-Object { $_.Name -eq 'StrongCopyleft' }).RuleId | Should -Be 'LIB-002'
+        ($result | Where-Object { $_.Name -eq 'WeakCopyleft' }).PolicyStatus | Should -Be 'REQUIRES_LICENSE'
+        ($result | Where-Object { $_.Name -eq 'WeakCopyleft' }).RuleId | Should -Be 'LIB-003'
+    }
+
+    It 'marks source-available restricted licenses as prohibited' {
+        $sw = @([PSCustomObject]@{
+            Name='RestrictedSourcePackage'; Version='1.0'; Publisher='NPM'; License='BUSL-1.1'
+        })
+
+        $result = Invoke-LGPolicyCheck -PolicyPath $script:repoPolicy -SoftwareCache $sw
+        $hit = $result | Where-Object { $_.Name -eq 'RestrictedSourcePackage' }
+
+        $hit.PolicyStatus | Should -Be 'PROHIBITED'
+        $hit.RuleId | Should -Be 'LIB-004'
+    }
+
+    It 'escalates permissive licenses to requires-license when attribution files are missing' {
+        $sw = @([PSCustomObject]@{
+            Name='PermissiveWithoutNotice'
+            Version='1.0'
+            Publisher='NPM'
+            License='MIT'
+            Detail='Package License: MIT [MISSING PHYSICAL LICENSE FILE]'
+        })
+
+        $result = Invoke-LGPolicyCheck -PolicyPath $script:repoPolicy -SoftwareCache $sw
+        $hit = $result | Where-Object { $_.Name -eq 'PermissiveWithoutNotice' }
+
+        $hit.PolicyStatus | Should -Be 'REQUIRES_LICENSE'
+        $hit.RuleId | Should -Be 'LIB-006'
+    }
+}
+
 Describe 'Get-LGRunningProcesses' {
     BeforeEach {
         Mock Get-Process {

@@ -1,25 +1,16 @@
-name: PowerShell CI
+name: Publish PowerShell Module
 
 on:
   push:
-    branches:
-      - master
-      - main
-      - updates
-      - 'feat/**'
-      - 'feature/**'
-      - 'fix/**'
-      - 'hotfix/**'
-  pull_request:
-    branches:
-      - master
-      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  test:
+  publish:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
@@ -35,7 +26,7 @@ jobs:
           if (-not $policy.rules -or $policy.rules.Count -eq 0) {
             throw "lg-policy.json does not contain any rules."
           }
-      
+
       - name: Run Pester tests
         shell: pwsh
         run: |
@@ -43,3 +34,13 @@ jobs:
             Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck
           }
           Invoke-Pester -Path .\LicenseGuard\Tests -Output Detailed
+
+      - name: Publish to PowerShell Gallery
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PS_GALLERY }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:PSGALLERY_API_KEY)) {
+            throw "Missing PS_GALLERY secret."
+          }
+          Publish-Module -Path .\LicenseGuard -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose

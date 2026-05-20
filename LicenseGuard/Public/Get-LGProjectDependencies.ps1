@@ -100,14 +100,16 @@ function Get-LGProjectDependencies {
                         if (-not $hasLicenseFile -and $license -ne "Unknown") {
                             $detailText += " [MISSING PHYSICAL LICENSE FILE]"
                         }
+                        $auditStatus = Get-LGLicenseAuditStatus -License $license -HasMissingAttribution (-not $hasLicenseFile)
 
                         $deps.Add([PSCustomObject]@{
+                            Module       = "NPM"
                             Name         = "$($projectName): $($json.name)"
                             Version      = $json.version
                             Publisher    = "NPM"
                             License      = $license
                             Detail       = $detailText
-                            Status       = "OK"
+                            Status       = $auditStatus
                             ComputerName = $env:COMPUTERNAME
                             HasLicense   = $hasLicenseFile
                         })
@@ -204,14 +206,16 @@ function Get-LGProjectDependencies {
                     if (-not $hasLicenseFile -and $license -ne "Unknown") {
                         $detailText += " [MISSING PHYSICAL LICENSE FILE]"
                     }
+                    $auditStatus = Get-LGLicenseAuditStatus -License $license -HasMissingAttribution (-not $hasLicenseFile)
 
                     $deps.Add([PSCustomObject]@{
+                        Module       = "NuGet"
                         Name         = "$($projectName): $($packageId)"
                         Version      = $version
                         Publisher    = "NuGet"
                         License      = $license
                         Detail       = $detailText
-                        Status       = "OK"
+                        Status       = $auditStatus
                         ComputerName = $env:COMPUTERNAME
                         HasLicense   = $hasLicenseFile
                     })

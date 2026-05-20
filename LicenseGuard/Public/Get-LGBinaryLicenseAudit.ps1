@@ -17,6 +17,7 @@ function Get-LGBinaryLicenseAudit {
     $seenResults = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     $nugetLicenseCache = @{}
     $licenseFilePatterns = @("LICENSE*", "LICENSES*", "COPYING*", "NOTICE*", "3rdpartylicenses*", "THIRD-PARTY-NOTICES*")
+    $buildArtifactPatterns = @("*.js", "*.mjs", "*.cjs", "*.css", "*.wasm")
 
     function Add-LGUniqueResult {
         param(
@@ -67,6 +68,47 @@ function Get-LGBinaryLicenseAudit {
         return $license
     }
 
+    function Get-LGSbomComponents {
+        param([string]$Directory)
+
+        $components = [System.Collections.Generic.List[PSCustomObject]]::new()
+        $sbomFiles = Get-ChildItem -Path $Directory -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like "*sbom*.json" -or $_.Name -like "*bom*.json" -or $_.Name -like "*spdx*.json" }
+
+        foreach ($sbom in $sbomFiles) {
+            Write-Host "    Found SBOM file: $($sbom.Name), parsing..." -ForegroundColor DarkGray
+            try {
+                $sbomData = Get-Content $sbom.FullName -Raw | ConvertFrom-Json
+
+                if ($sbomData.bomFormat -eq "CycloneDX" -and $sbomData.components) {
+                    foreach ($comp in $sbomData.components) {
+                        $compLicense = "Unknown"
+                        if ($comp.licenses -and $comp.licenses.Count -gt 0) {
+                            $lic = $comp.licenses[0]
+                            if ($lic.license) {
+                                $compLicense = if ($lic.license.id) { $lic.license.id } else { $lic.license.name }
+                            } elseif ($lic.expression) {
+                                $compLicense = $lic.expression
+                            }
+                        }
+
+                        $components.Add([PSCustomObject]@{
+                            Source    = $sbom.Name
+                            Name      = $comp.name
+                            Version   = $comp.version
+                            Publisher = if ($comp.publisher) { $comp.publisher } else { "Unknown" }
+                            License   = $compLicense
+                        })
+                    }
+                }
+            } catch {
+                # Skip invalid SBOMs
+            }
+        }
+
+        $components
+    }
+
     foreach ($targetPath in $Path) {
         if (-not (Test-Path $targetPath)) {
             Write-Warning "Binary path not found: $targetPath"
@@ -86,6 +128,14 @@ function Get-LGBinaryLicenseAudit {
                             Where-Object { $_.Name -like "LICENSE*" -or $_.Name -like "3rdpartylicenses*" -or $_.Name -like "LICENSES*" -or $_.Name -like "NOTICE*" }
         
         $hasRootLicense = ($rootLicenseFiles.Count -gt 0)
+        $sbomComponents = @(Get-LGSbomComponents -Directory $dir)
+        $sbomPackageKeys = @{}
+        foreach ($component in $sbomComponents) {
+            if ($component.Name -and $component.Version) {
+                $key = "{0}|{1}" -f $component.Name.ToLowerInvariant(), $component.Version
+                $sbomPackageKeys[$key] = $true
+            }
+        }
 
         # 2. Get list of binaries to inspect (.exe and .dll)
         $binaries = if ($specificFiles.Count -gt 0) { $specificFiles } else {
@@ -95,6 +145,54 @@ function Get-LGBinaryLicenseAudit {
 
         if ($binaries.Count -gt 0) {
             Write-Host "  Auditing $($binaries.Count) binaries in $dir..." -ForegroundColor Cyan
+        }
+
+        $buildArtifacts = Get-ChildItem -Path $dir -Include $buildArtifactPatterns -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch '[\\/]node_modules[\\/]' }
+
+        if ($buildArtifacts.Count -gt 0) {
+            Write-Host "  Auditing $($buildArtifacts.Count) build artifact(s) in $dir..." -ForegroundColor Cyan
+        }
+
+        foreach ($artifact in $buildArtifacts) {
+            $artifactText = ''
+            try {
+                $artifactText = Get-Content $artifact.FullName -Raw -ErrorAction Stop
+            } catch {}
+
+            $licenseType = "Unknown"
+            if ($artifactText -match "(?i)Affero General Public License|\bAGPL\b") {
+                $licenseType = "AGPL"
+            } elseif ($artifactText -match "(?i)General Public License|\bGPL\b|GPL-3\.0|GPL-2\.0") {
+                $licenseType = "GPL"
+            } elseif ($artifactText -match "(?i)MIT License|\bMIT\b") {
+                $licenseType = "MIT"
+            } elseif ($artifactText -match "(?i)Apache License|Apache-2\.0") {
+                $licenseType = "Apache-2.0"
+            } elseif ($artifactText -match "(?i)BSD License|\bBSD\b") {
+                $licenseType = "BSD"
+            } elseif ($artifactText -match "(?i)\bISC\b") {
+                $licenseType = "ISC"
+            }
+
+            $detailText = "Build Artifact License Scan"
+            if (-not $hasRootLicense) {
+                $detailText += " [MISSING LICENSE/ATTRIBUTION FILE]"
+            }
+            if ($licenseType -eq "Unknown") {
+                $detailText += " [UNKNOWN LICENSE]"
+            }
+
+            Add-LGUniqueResult -Item ([PSCustomObject]@{
+                Module       = "BinaryAudit"
+                Name         = "Build Artifact: $($artifact.Name)"
+                Version      = ""
+                Publisher    = "BuildOutput"
+                License      = $licenseType
+                Detail       = $detailText
+                Status       = Get-LGLicenseAuditStatus -License $licenseType -HasMissingAttribution (-not $hasRootLicense)
+                ComputerName = $env:COMPUTERNAME
+            })
         }
 
         foreach ($bin in $binaries) {
@@ -132,12 +230,13 @@ function Get-LGBinaryLicenseAudit {
             }
 
             Add-LGUniqueResult -Item ([PSCustomObject]@{
+                Module       = "BinaryAudit"
                 Name         = "Binary: $($binName)"
                 Version      = $version
                 Publisher    = $company
                 License      = $licenseType
                 Detail       = "Copyright: $copyright | $complianceDetail"
-                Status       = "OK"
+                Status       = Get-LGLicenseAuditStatus -License $licenseType -HasMissingAttribution (-not $hasRootLicense)
                 ComputerName = $env:COMPUTERNAME
             })
 
@@ -159,6 +258,10 @@ function Get-LGBinaryLicenseAudit {
                                 if ($depKey -match "^([^/]+)/(.+)$") {
                                     $packageId = $Matches[1]
                                     $pkgVersion = $Matches[2]
+                                    $sbomKey = "{0}|{1}" -f $packageId.ToLowerInvariant(), $pkgVersion
+                                    if ($sbomPackageKeys.ContainsKey($sbomKey)) {
+                                        continue
+                                    }
 
                                     # Only look at package dependencies, skip projects or runtimes
                                     $depVal = $depProp.Value
@@ -211,12 +314,13 @@ function Get-LGBinaryLicenseAudit {
                                         }
 
                                         Add-LGUniqueResult -Item ([PSCustomObject]@{
+                                            Module       = "BinaryAudit"
                                             Name         = "Binary Dependency ($binName): $packageId"
                                             Version      = $pkgVersion
                                             Publisher    = "NuGet"
                                             License      = $license
                                             Detail       = $detailText
-                                            Status       = "OK"
+                                            Status       = Get-LGLicenseAuditStatus -License $license -HasMissingAttribution (-not $hasLicenseFile)
                                             ComputerName = $env:COMPUTERNAME
                                         })
                                     }
@@ -229,47 +333,19 @@ function Get-LGBinaryLicenseAudit {
                 }
             }
 
-            # C. Check for CycloneDX / SPDX SBOM Files in same directory
-            # Format: sbom.json, bom.json, cyclonedx.json, spdx.json
-            $sbomFiles = Get-ChildItem -Path $dir -File -ErrorAction SilentlyContinue | 
-                          Where-Object { $_.Name -like "*sbom*.json" -or $_.Name -like "*bom*.json" -or $_.Name -like "*spdx*.json" }
-            
-            foreach ($sbom in $sbomFiles) {
-                Write-Host "    Found SBOM file: $($sbom.Name), parsing..." -ForegroundColor DarkGray
-                try {
-                    $sbomData = Get-Content $sbom.FullName -Raw | ConvertFrom-Json
-                    
-                    # CycloneDX format parsing
-                    if ($sbomData.bomFormat -eq "CycloneDX" -and $sbomData.components) {
-                        foreach ($comp in $sbomData.components) {
-                            $compName = $comp.name
-                            $compVer  = $comp.version
-                            $compLicense = "Unknown"
-                            
-                            if ($comp.licenses -and $comp.licenses.Count -gt 0) {
-                                $lic = $comp.licenses[0]
-                                if ($lic.license) {
-                                    $compLicense = if ($lic.license.id) { $lic.license.id } else { $lic.license.name }
-                                } elseif ($lic.expression) {
-                                    $compLicense = $lic.expression
-                                }
-                            }
+        }
 
-                            Add-LGUniqueResult -Item ([PSCustomObject]@{
-                                Name         = "SBOM Dependency ($($sbom.Name)): $compName"
-                                Version      = $compVer
-                                Publisher    = if ($comp.publisher) { $comp.publisher } else { "Unknown" }
-                                License      = $compLicense
-                                Detail       = "SBOM Package License: $compLicense"
-                                Status       = "OK"
-                                ComputerName = $env:COMPUTERNAME
-                            })
-                        }
-                    }
-                } catch {
-                    # Skip invalid SBOMs
-                }
-            }
+        foreach ($component in $sbomComponents) {
+            Add-LGUniqueResult -Item ([PSCustomObject]@{
+                Module       = "BinaryAudit"
+                Name         = "SBOM Dependency ($($component.Source)): $($component.Name)"
+                Version      = $component.Version
+                Publisher    = $component.Publisher
+                License      = $component.License
+                Detail       = "SBOM Package License: $($component.License)"
+                Status       = Get-LGLicenseAuditStatus -License $component.License
+                ComputerName = $env:COMPUTERNAME
+            })
         }
     }
 
