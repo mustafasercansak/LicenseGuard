@@ -1,5 +1,5 @@
 @{
-    ModuleVersion     = '3.0.0'
+    ModuleVersion     = '3.1.0'
     GUID              = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
     Author            = 'Mustafa Sercan Sak'
     CompanyName       = 'mustafasercansak'
@@ -47,7 +47,7 @@
         PSData = @{
             Tags         = @('License', 'Compliance', 'Security', 'Audit', 'ActiveDirectory', 'AssetManagement')
             ProjectUri   = 'https://github.com/mustafasercansak/LicenseGuard'
-            ReleaseNotes = 'v3.0.0: Professional Module overhaul. Full CLI experience, AD integration, and scheduled auditing.'
+            ReleaseNotes = 'v3.1.0: Added project dependency, binary artifact, SBOM, and build output license auditing with stronger policy classification.'
             LicenseUri   = 'https://github.com/mustafasercansak/LicenseGuard/blob/master/LICENSE'
         }
     }
