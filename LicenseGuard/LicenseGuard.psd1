@@ -3,7 +3,7 @@
     GUID              = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
     Author            = 'Mustafa Sercan Sak'
     CompanyName       = 'mustafasercansak'
-    Copyright         = '(c) 2024 Mustafa Sercan Sak. MIT License.'
+    Copyright         = '(c) 2026 Mustafa Sercan Sak. MIT License.'
     Description       = 'Enterprise license compliance scanner for Windows environments with multi-machine and AD support.'
     PowerShellVersion = '5.1'
     RootModule        = 'LicenseGuard.psm1'
@@ -45,7 +45,7 @@
 
     PrivateData = @{
         PSData = @{
-            Tags         = @('License', 'Compliance', 'Security', 'Audit', 'ActiveDirectory', 'AssetManagement')
+            Tags         = @('License', 'Compliance', 'Security', 'Audit', 'ActiveDirectory', 'AssetManagement', 'Windows', 'Enterprise')
             ProjectUri   = 'https://github.com/mustafasercansak/LicenseGuard'
             ReleaseNotes = 'v3.1.0: Added project dependency, binary artifact, SBOM, and build output license auditing with stronger policy classification.'
             LicenseUri   = 'https://github.com/mustafasercansak/LicenseGuard/blob/master/LICENSE'

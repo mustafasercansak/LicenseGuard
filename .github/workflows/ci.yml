@@ -14,6 +14,7 @@ on:
     branches:
       - master
       - main
+      - updates
 
 permissions:
   contents: read
@@ -32,10 +33,38 @@ jobs:
         shell: pwsh
         run: |
           $policy = Get-Content .\lg-policy.json -Raw | ConvertFrom-Json
-          if (-not $policy.rules -or $policy.rules.Count -eq 0) {
+          $rules = $policy.rules
+          if (-not $rules -or $rules.Count -eq 0) {
             throw "lg-policy.json does not contain any rules."
           }
-      
+
+          Write-Host "Policy rules loaded: $($rules.Count)"
+
+          $duplicates = $rules | ForEach-Object { $_.id } | Group-Object | Where-Object { $_.Count -gt 1 }
+          if ($duplicates) {
+            $duplicates | ForEach-Object { Write-Error "Duplicate policy ID: $($_.Name)" }
+            exit 1
+          }
+
+          $validStatuses = @('ALLOWED', 'REQUIRES_LICENSE', 'PROHIBITED')
+          $validMatchTypes = @('contains', 'startsWith', 'exact', 'regex')
+          $invalid = $rules | Where-Object {
+            $validStatuses -notcontains $_.status -or
+            $validMatchTypes -notcontains $_.matchType -or
+            [string]::IsNullOrWhiteSpace($_.id) -or
+            [string]::IsNullOrWhiteSpace($_.pattern)
+          }
+          if ($invalid) {
+            $invalid | ForEach-Object { Write-Error "Invalid rule: $($_.id) status=$($_.status) matchType=$($_.matchType)" }
+            exit 1
+          }
+
+          Write-Host "All $($rules.Count) policy rules are valid."
+
+      - name: Validate example config JSON
+        shell: pwsh
+        run: Get-Content .\lg-config.example.json -Raw | ConvertFrom-Json | Out-Null
+
       - name: Run Pester tests
         shell: pwsh
         run: |
