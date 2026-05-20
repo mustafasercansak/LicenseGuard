@@ -56,37 +56,64 @@ function Invoke-LGPolicyCheck {
             continue
         }
 
-        # Rule matching
-        $matched = $false
+        # Rule matching. Multiple policy rules can match the same row (for example
+        # MIT license + missing attribution); choose the highest-risk outcome.
+        $ruleMatches = [System.Collections.Generic.List[PSCustomObject]]::new()
         foreach ($rule in $policy.rules) {
+            $matchFieldProp = $rule.PSObject.Properties['matchField']
+            $matchField = if ($matchFieldProp -and $matchFieldProp.Value) { $matchFieldProp.Value } else { 'name' }
+            
+            $fieldValue = switch ($matchField) {
+                'license' {
+                    $prop = $sw.PSObject.Properties['License']
+                    if ($prop) { $prop.Value } else { '' }
+                }
+                'name' {
+                    $sw.Name
+                }
+                default {
+                    $prop = $sw.PSObject.Properties[$matchField]
+                    if ($prop) { $prop.Value } else { '' }
+                }
+            }
+
+            if (-not $fieldValue) { continue }
+
             $match = switch ($rule.matchType) {
-                'contains'   { $sw.Name -like "*$($rule.pattern)*" }
-                'startsWith' { $sw.Name -like "$($rule.pattern)*"  }
-                'exact'      { $sw.Name -eq $rule.pattern           }
-                'regex'      { $sw.Name -match $rule.pattern        }
+                'contains'   { $fieldValue -like "*$($rule.pattern)*" }
+                'startsWith' { $fieldValue -like "$($rule.pattern)*"  }
+                'exact'      { $fieldValue -eq $rule.pattern           }
+                'regex'      { $fieldValue -match $rule.pattern        }
                 default      { $false }
             }
             if ($match) {
-                $statusMap = @{ 'PROHIBITED'='EXPIRED'; 'REQUIRES_LICENSE'='WARN'; 'ALLOWED'='OK' }
-                $sevProp   = $rule.PSObject.Properties['severity']
-                $severity  = if ($sevProp -and $sevProp.Value) { $sevProp.Value } else {
-                    switch ($rule.status) { 'PROHIBITED' { 'HIGH' } 'REQUIRES_LICENSE' { 'MEDIUM' } default { 'LOW' } }
-                }
-                $altProp   = $rule.PSObject.Properties['alternative']
-                $refProp   = $rule.PSObject.Properties['referenceUrl']
-                $findings.Add([PSCustomObject]@{
-                    Module       = 'PolicyCheck'; RuleId = $rule.id; Category = $rule.category
-                    Name         = $sw.Name; Version = $sw.Version; Publisher = $sw.Publisher
-                    PolicyStatus = $rule.status; Status = $statusMap[$rule.status]; Detail = $rule.reason
-                    Alternative  = if ($altProp) { $altProp.Value } else { '' }
-                    Reference    = if ($refProp) { $refProp.Value } else { '' }
-                    Severity     = $severity
-                })
-                $matched = $true; break
+                $priority = switch ($rule.status) { 'PROHIBITED' { 3 } 'REQUIRES_LICENSE' { 2 } 'ALLOWED' { 1 } default { 0 } }
+                $ruleMatches.Add([PSCustomObject]@{ Rule = $rule; Priority = $priority })
             }
         }
 
-        if (-not $matched) {
+        if ($ruleMatches.Count -gt 0) {
+            $rule = ($ruleMatches | Sort-Object Priority -Descending | Select-Object -First 1).Rule
+            $statusMap = @{ 'PROHIBITED'='EXPIRED'; 'REQUIRES_LICENSE'='WARN'; 'ALLOWED'='OK' }
+            $sevProp   = $rule.PSObject.Properties['severity']
+            $severity  = if ($sevProp -and $sevProp.Value) { $sevProp.Value } else {
+                switch ($rule.status) { 'PROHIBITED' { 'HIGH' } 'REQUIRES_LICENSE' { 'MEDIUM' } default { 'LOW' } }
+            }
+            $altProp   = $rule.PSObject.Properties['alternative']
+            $refProp   = $rule.PSObject.Properties['referenceUrl']
+            $swDetailProp = $sw.PSObject.Properties['Detail']
+            $swDetail = if ($swDetailProp) { $swDetailProp.Value } else { '' }
+            $detailVal = if ($swDetail) { "$($rule.reason) | $swDetail" } else { $rule.reason }
+
+            $findings.Add([PSCustomObject]@{
+                Module       = 'PolicyCheck'; RuleId = $rule.id; Category = $rule.category
+                Name         = $sw.Name; Version = $sw.Version; Publisher = $sw.Publisher
+                PolicyStatus = $rule.status; Status = $statusMap[$rule.status]; Detail = $detailVal
+                Alternative  = if ($altProp) { $altProp.Value } else { '' }
+                Reference    = if ($refProp) { $refProp.Value } else { '' }
+                Severity     = $severity
+            })
+        } else {
             $findings.Add([PSCustomObject]@{
                 Module       = 'PolicyCheck'; RuleId = 'N/A'; Category = 'N/A'
                 Name         = $sw.Name; Version = $sw.Version; Publisher = $sw.Publisher

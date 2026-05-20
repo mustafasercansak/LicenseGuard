@@ -1,24 +1,46 @@
-name: Publish to PowerShell Gallery
+name: Publish PowerShell Module
 
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   publish:
     runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Validate module manifest
         shell: pwsh
-        run: Test-ModuleManifest -Path ./LicenseGuard/LicenseGuard.psd1
+        run: Test-ModuleManifest -Path .\LicenseGuard\LicenseGuard.psd1
 
-      - name: Publish module
+      - name: Validate policy JSON
+        shell: pwsh
+        run: |
+          $policy = Get-Content .\lg-policy.json -Raw | ConvertFrom-Json
+          if (-not $policy.rules -or $policy.rules.Count -eq 0) {
+            throw "lg-policy.json does not contain any rules."
+          }
+
+      - name: Run Pester tests
+        shell: pwsh
+        run: |
+          if (-not (Get-Module Pester -ListAvailable | Where-Object Version -ge '5.0.0')) {
+            Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck
+          }
+          Invoke-Pester -Path .\LicenseGuard\Tests -Output Detailed
+
+      - name: Publish to PowerShell Gallery
         shell: pwsh
         env:
           PSGALLERY_API_KEY: ${{ secrets.PS_GALLERY }}
         run: |
-          Publish-Module -Path ./LicenseGuard -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
+          if ([string]::IsNullOrWhiteSpace($env:PSGALLERY_API_KEY)) {
+            throw "Missing PS_GALLERY secret."
+          }
+          Publish-Module -Path .\LicenseGuard -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose

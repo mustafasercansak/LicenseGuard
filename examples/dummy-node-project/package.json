@@ -1,0 +1,9 @@
+{
+  "name": "dummy-node-project",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.18.2",
+    "bad-lib": "^1.0.0",
+    "unknown-lib": "^2.1.0"
+  }
+}

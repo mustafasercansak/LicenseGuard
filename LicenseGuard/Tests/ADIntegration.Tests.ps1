@@ -5,24 +5,26 @@
     Tests mock the ActiveDirectory module so RSAT is not required to run tests.
 #>
 
-BeforeAll {
-    $modulePath = Join-Path (Split-Path $PSScriptRoot) 'LicenseGuard.psm1'
-    Import-Module $modulePath -Force -ErrorAction Stop
-    Initialize-LicenseGuard -Language en
+Describe 'AD Integration' {
+    BeforeAll {
+        $modulePath = Join-Path (Split-Path $PSScriptRoot) 'LicenseGuard.psm1'
+        Import-Module $modulePath -Force -ErrorAction Stop
+        Initialize-LicenseGuard -Language en
 
-    # Stub the ActiveDirectory module so tests run without RSAT installed
-    if (-not (Get-Module -Name ActiveDirectory -ListAvailable)) {
-        New-Module -Name ActiveDirectory -ScriptBlock {
-            function Get-ADComputer     { [CmdletBinding()] param([Parameter(ValueFromPipeline)]$Identity,$Filter,$SearchBase,$Properties,$Server,$Credential) process {} }
-            function Get-ADGroupMember  { [CmdletBinding()] param($Identity,$Server,$Credential) }
-        } | Import-Module -Force
+        # Stub the ActiveDirectory module so tests run without RSAT installed
+        if (-not (Get-Module -Name ActiveDirectory -ListAvailable)) {
+            New-Module -Name ActiveDirectory -ScriptBlock {
+                function Get-ADComputer     { [CmdletBinding()] param([Parameter(ValueFromPipeline)]$Identity,$Filter,$SearchBase,$Properties,$Server,$Credential) process {} }
+                function Get-ADGroupMember  { [CmdletBinding()] param($Identity,$Server,$Credential) }
+            } | Import-Module -Force
+        }
     }
-}
 
-AfterAll {
-    Remove-Module LicenseGuard     -ErrorAction SilentlyContinue
-    Remove-Module ActiveDirectory  -ErrorAction SilentlyContinue
-}
+    AfterAll {
+        Remove-Module LicenseGuard     -ErrorAction SilentlyContinue
+        Remove-Module ActiveDirectory  -ErrorAction SilentlyContinue
+    }
+
 
 Describe 'Get-LGADComputers' {
     Context 'Filter-based search' {
@@ -135,3 +137,4 @@ Describe 'Get-LGADComputers' {
         }
     }
 }
+} # End AD Integration

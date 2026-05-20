@@ -228,14 +228,14 @@ function Invoke-LGRemoteScan {
                                 Detail       = $eol.Detail; Version = ''; Publisher = ''
                             })
                         }
-                        Write-Host "  [$pc] done — $(@($data.Software).Count) apps" -ForegroundColor DarkGray
+                        Write-Host "  [$pc] done - $(@($data.Software).Count) apps" -ForegroundColor DarkGray
                     } elseif ($job.State -eq 'Failed') {
                         $results.Add([PSCustomObject]@{
                             ComputerName = $pc; Module = 'Connection'
                             Name         = "$pc scan"; Status = 'ERROR'
                             Detail       = 'Job failed'; Version = ''; Publisher = ''
                         })
-                        Write-Host "  [$pc] ERROR — job failed" -ForegroundColor Red
+                        Write-Host "  [$pc] ERROR - job failed" -ForegroundColor Red
                     }
                 } catch {
                     $results.Add([PSCustomObject]@{
@@ -243,7 +243,7 @@ function Invoke-LGRemoteScan {
                         Name         = "$pc scan"; Status = 'ERROR'
                         Detail       = $_.Exception.Message; Version = ''; Publisher = ''
                     })
-                    Write-Host "  [$pc] ERROR — $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "  [$pc] ERROR - $($_.Exception.Message)" -ForegroundColor Red
                 }
                 Remove-Job $job -Force -ErrorAction SilentlyContinue
                 $jobs.Remove($pc)

@@ -29,6 +29,31 @@ function Protect-HtmlString {
     $s -replace '&', '&amp;' -replace '<', '&lt;' -replace '>', '&gt;' -replace '"', '&quot;'
 }
 
+function Get-LGLicenseAuditStatus {
+    param(
+        [string]$License,
+        [bool]$HasMissingAttribution = $false
+    )
+
+    $lic = if ([string]::IsNullOrWhiteSpace($License)) { 'Unknown' } else { $License }
+
+    if ($lic -match '(?i)(^|[^A-Za-z])(AGPL|GPL)([^A-Za-z]|$)' -or
+        $lic -match '(?i)SSPL|BUSL|Commons Clause|PolyForm|Elastic License|Server Side Public License|Business Source License') {
+        return 'EXPIRED'
+    }
+
+    if ($lic -match '(?i)(^|[^A-Za-z])(LGPL|MPL|EPL|CDDL)([^A-Za-z]|$)' -or
+        $lic -match '(?i)^Unknown$|NOASSERTION|UNLICENSED|SEE LICENSE') {
+        return 'WARN'
+    }
+
+    if ($HasMissingAttribution) {
+        return 'WARN'
+    }
+
+    'OK'
+}
+
 function Write-LGEventLog {
     param([string]$Message, [string]$EntryType = 'Information', [int]$EventId = 1000)
     try {
