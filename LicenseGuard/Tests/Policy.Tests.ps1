@@ -4,12 +4,13 @@
     Pester v5 tests for policy engine edge cases.
 #>
 
-BeforeAll {
-    $modulePath = Join-Path (Split-Path $PSScriptRoot) 'LicenseGuard.psm1'
-    Import-Module $modulePath -Force -ErrorAction Stop
-    Initialize-LicenseGuard -Language en
+Describe 'Policy Logic' {
+    BeforeAll {
+        $modulePath = Join-Path (Split-Path $PSScriptRoot) 'LicenseGuard.psm1'
+        Import-Module $modulePath -Force -ErrorAction Stop
+        Initialize-LicenseGuard -Language en
 
-    $script:policyContent = @'
+        $script:policyContent = @'
 {
   "rules": [
     { "id":"R001","category":"P2P","pattern":"BitTorrent","matchType":"contains","status":"PROHIBITED","reason":"P2P not permitted","severity":"HIGH","alternative":"None","referenceUrl":"" },
@@ -119,3 +120,5 @@ Describe 'Get-LGRunningProcesses' {
         $result   | Should -BeNullOrEmpty
     }
 }
+
+} # End Policy Logic

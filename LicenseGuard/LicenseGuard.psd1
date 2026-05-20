@@ -34,6 +34,7 @@
         'Save-LGSnapshot'
         'Get-LGDelta'
         'Invoke-LicenseGuard'
+        'Register-LGScheduledTask'
     )
 
     CmdletsToExport   = @()
@@ -42,9 +43,10 @@
 
     PrivateData = @{
         PSData = @{
-            Tags         = @('License', 'Compliance', 'Security', 'Audit', 'ActiveDirectory')
+            Tags         = @('License', 'Compliance', 'Security', 'Audit', 'ActiveDirectory', 'AssetManagement')
             ProjectUri   = 'https://github.com/mustafasercansak/LicenseGuard'
-            ReleaseNotes = 'v3.0: Converted to module. Added AD integration, parallel multi-machine scan, Pester tests.'
+            ReleaseNotes = 'v3.0.0: Professional Module overhaul. Full CLI experience, AD integration, and scheduled auditing.'
+            LicenseUri   = 'https://github.com/mustafasercansak/LicenseGuard/blob/master/LICENSE'
         }
     }
 }

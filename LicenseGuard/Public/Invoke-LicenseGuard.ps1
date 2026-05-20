@@ -21,6 +21,7 @@ function Invoke-LicenseGuard {
         [string]$ExportCsv        = '',
         [string]$ExportJson       = '',
         [string]$SarifPath        = '',
+        [string[]]$ProjectPath    = @(),
         [switch]$ConsoleOnly,
         [switch]$SendMail,
         [switch]$NoDelta,
@@ -63,8 +64,8 @@ function Invoke-LicenseGuard {
 
     Write-Host "`n  $($L['starting'])`n" -ForegroundColor White
 
-    $brandColor   = if ($cfg.Branding?.PrimaryColor) { $cfg.Branding.PrimaryColor } else { '#3b82f6' }
-    $brandCompany = if ($cfg.Branding?.CompanyName)  { $cfg.Branding.CompanyName  } else { '' }
+    $brandColor   = if ($null -ne $cfg.Branding -and $cfg.Branding.PrimaryColor) { $cfg.Branding.PrimaryColor } else { '#3b82f6' }
+    $brandCompany = if ($null -ne $cfg.Branding -and $cfg.Branding.CompanyName)  { $cfg.Branding.CompanyName  } else { '' }
 
     $allResults     = [System.Collections.Generic.List[PSCustomObject]]::new()
     $policyFindings = @()
@@ -92,8 +93,24 @@ function Invoke-LicenseGuard {
     $r = Get-LGFlexLMStatus; if ($r) { $r | ForEach-Object { $allResults.Add($_) } }
     $r = Get-LGSaaSStatus;   if ($r) { $r | ForEach-Object { $allResults.Add($_) } }
 
+    # Project Dependencies (SCA) & Binary Audit
+    $itemsToCheck = @($swCache)
+    if ($ProjectPath -and $ProjectPath.Count -gt 0) {
+        $deps = Get-LGProjectDependencies -ProjectPath $ProjectPath
+        if ($deps) {
+            $itemsToCheck += $deps
+            $deps | ForEach-Object { $allResults.Add($_) }
+        }
+        
+        $binAudit = Get-LGBinaryLicenseAudit -Path $ProjectPath
+        if ($binAudit) {
+            $itemsToCheck += $binAudit
+            $binAudit | ForEach-Object { $allResults.Add($_) }
+        }
+    }
+
     # Policy check
-    $policyFindings = @(Invoke-LGPolicyCheck -PolicyPath $PolicyPath -SoftwareCache $swCache)
+    $policyFindings = @(Invoke-LGPolicyCheck -PolicyPath $PolicyPath -SoftwareCache $itemsToCheck)
 
     # Post-policy scans
     $r = Get-LGRunningProcesses -PolicyFindings $policyFindings; if ($r) { $r | ForEach-Object { $allResults.Add($_) } }

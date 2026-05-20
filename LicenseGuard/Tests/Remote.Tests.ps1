@@ -4,6 +4,7 @@
     Pester v5 tests for Invoke-LGRemoteScan (multi-machine parallel scanning).
 #>
 
+Describe 'Remote Scan' {
 BeforeAll {
     $modulePath = Join-Path (Split-Path $PSScriptRoot) 'LicenseGuard.psm1'
     Import-Module $modulePath -Force -ErrorAction Stop
@@ -135,3 +136,5 @@ Describe 'Invoke-LGRemoteScan' {
         }
     }
 }
+
+} # End Remote Scan

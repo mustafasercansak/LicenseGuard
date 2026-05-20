@@ -31,7 +31,7 @@ function Get-LGBrowserExtensions {
                         $lf = Join-Path (Split-Path $mf.FullName) "_locales\$loc\messages.json"
                         if (Test-Path $lf) {
                             $msgs = Get-Content $lf -Raw | ConvertFrom-Json
-                            if ($msgs.$key?.message) { $name = $msgs.$key.message; break }
+                            if ($null -ne $msgs.$key -and $null -ne $msgs.$key.message) { $name = $msgs.$key.message; break }
                         }
                     }
                     if ($name -like '__MSG_*') { $name = $_.Name }
@@ -58,7 +58,7 @@ function Get-LGBrowserExtensions {
                     $exts = (Get-Content $extFile -Raw | ConvertFrom-Json).addons |
                                 Where-Object { $_.type -eq 'extension' -and $_.location -ne 'app-builtin' }
                     foreach ($ext in $exts) {
-                        $name = if ($ext.defaultLocale?.name) { $ext.defaultLocale.name } else { $ext.id }
+                        $name = if ($null -ne $ext.defaultLocale -and $null -ne $ext.defaultLocale.name) { $ext.defaultLocale.name } else { $ext.id }
                         Write-LGStatus "[Firefox] $name" "v$($ext.version)" 'OK'
                         $rows.Add([PSCustomObject]@{
                             Module  = 'BrowserExt'; Name = $name; Status = 'OK'

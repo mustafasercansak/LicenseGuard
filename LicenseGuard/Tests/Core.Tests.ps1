@@ -4,14 +4,16 @@
     Pester v5 tests for core LicenseGuard module functions.
 #>
 
-BeforeAll {
-    $modulePath = Join-Path (Split-Path $PSScriptRoot) 'LicenseGuard.psm1'
-    Import-Module $modulePath -Force -ErrorAction Stop
-}
+Describe 'LicenseGuard Core' {
+    BeforeAll {
+        $modulePath = Join-Path (Split-Path $PSScriptRoot) 'LicenseGuard.psm1'
+        Import-Module $modulePath -Force -ErrorAction Stop
+    }
 
-AfterAll {
-    Remove-Module LicenseGuard -ErrorAction SilentlyContinue
-}
+    AfterAll {
+        Remove-Module LicenseGuard -ErrorAction SilentlyContinue
+    }
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 Describe 'Initialize-LicenseGuard' {
@@ -290,3 +292,4 @@ Describe 'Save-LGSnapshot and Get-LGDelta' {
         $delta | Should -BeNullOrEmpty
     }
 }
+} # End of LicenseGuard Core

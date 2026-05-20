@@ -59,11 +59,23 @@ function Invoke-LGPolicyCheck {
         # Rule matching
         $matched = $false
         foreach ($rule in $policy.rules) {
+            $matchFieldProp = $rule.PSObject.Properties['matchField']
+            $matchField = if ($matchFieldProp -and $matchFieldProp.Value) { $matchFieldProp.Value } else { 'name' }
+            
+            $fieldValue = if ($matchField -eq 'license') { 
+                $prop = $sw.PSObject.Properties['License']
+                if ($prop) { $prop.Value } else { '' }
+            } else { 
+                $sw.Name 
+            }
+
+            if (-not $fieldValue) { continue }
+
             $match = switch ($rule.matchType) {
-                'contains'   { $sw.Name -like "*$($rule.pattern)*" }
-                'startsWith' { $sw.Name -like "$($rule.pattern)*"  }
-                'exact'      { $sw.Name -eq $rule.pattern           }
-                'regex'      { $sw.Name -match $rule.pattern        }
+                'contains'   { $fieldValue -like "*$($rule.pattern)*" }
+                'startsWith' { $fieldValue -like "$($rule.pattern)*"  }
+                'exact'      { $fieldValue -eq $rule.pattern           }
+                'regex'      { $fieldValue -match $rule.pattern        }
                 default      { $false }
             }
             if ($match) {
@@ -74,10 +86,14 @@ function Invoke-LGPolicyCheck {
                 }
                 $altProp   = $rule.PSObject.Properties['alternative']
                 $refProp   = $rule.PSObject.Properties['referenceUrl']
+                $swDetailProp = $sw.PSObject.Properties['Detail']
+                $swDetail = if ($swDetailProp) { $swDetailProp.Value } else { '' }
+                $detailVal = if ($swDetail) { "$($rule.reason) | $swDetail" } else { $rule.reason }
+
                 $findings.Add([PSCustomObject]@{
                     Module       = 'PolicyCheck'; RuleId = $rule.id; Category = $rule.category
                     Name         = $sw.Name; Version = $sw.Version; Publisher = $sw.Publisher
-                    PolicyStatus = $rule.status; Status = $statusMap[$rule.status]; Detail = $rule.reason
+                    PolicyStatus = $rule.status; Status = $statusMap[$rule.status]; Detail = $detailVal
                     Alternative  = if ($altProp) { $altProp.Value } else { '' }
                     Reference    = if ($refProp) { $refProp.Value } else { '' }
                     Severity     = $severity
