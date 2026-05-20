@@ -13,6 +13,8 @@
         'Get-LGWindowsActivation'
         'Get-LGOfficeLicense'
         'Get-LGInstalledSoftware'
+        'Get-LGProjectDependencies'
+        'Get-LGBinaryLicenseAudit'
         'Get-LGEolStatus'
         'Get-LGFlexLMStatus'
         'Get-LGSaaSStatus'

@@ -710,8 +710,8 @@
     {
       "id": "AI-002",
       "category": "AI Araçları",
-      "pattern": "Cursor",
-      "matchType": "contains",
+      "pattern": "\\bCursor(\\s+IDE)?\\b",
+      "matchType": "regex",
       "status": "REQUIRES_LICENSE",
       "reason": "Cursor Pro/Business ticari kullanım için ücretli; ücretsiz plan sınırlı istek hakkı içerir.",
       "alternative": "VS Code + Codeium (ücretsiz) veya Cursor Pro lisansı",

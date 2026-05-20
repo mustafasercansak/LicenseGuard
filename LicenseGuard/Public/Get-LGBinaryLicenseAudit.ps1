@@ -14,7 +14,58 @@ function Get-LGBinaryLicenseAudit {
 
     $L = Get-LGEffectiveStrings
     $results = [System.Collections.Generic.List[PSCustomObject]]::new()
+    $seenResults = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    $nugetLicenseCache = @{}
     $licenseFilePatterns = @("LICENSE*", "LICENSES*", "COPYING*", "NOTICE*", "3rdpartylicenses*", "THIRD-PARTY-NOTICES*")
+
+    function Add-LGUniqueResult {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCustomObject]$Item
+        )
+
+        $key = "{0}|{1}|{2}|{3}|{4}" -f $Item.Name, $Item.Version, $Item.Publisher, $Item.License, $Item.Detail
+        if ($seenResults.Add($key)) {
+            $results.Add($Item)
+        }
+    }
+
+    function Resolve-LGNuGetLicenseFromApi {
+        param(
+            [Parameter(Mandatory = $true)][string]$PackageId,
+            [Parameter(Mandatory = $true)][string]$Version
+        )
+
+        $cacheKey = "$($PackageId.ToLowerInvariant())/$Version"
+        if ($nugetLicenseCache.ContainsKey($cacheKey)) {
+            return $nugetLicenseCache[$cacheKey]
+        }
+
+        $license = "Unknown"
+        try {
+            $pkg = $PackageId.ToLowerInvariant()
+            $ver = $Version.ToLowerInvariant()
+            $uri = "https://api.nuget.org/v3/registration5-semver1/$pkg/$ver.json"
+            $resp = Invoke-RestMethod -Uri $uri -Method Get -TimeoutSec 5
+            $entry = $resp.catalogEntry
+
+            if ($entry -and $entry.licenseExpression) {
+                $license = [string]$entry.licenseExpression
+            } elseif ($entry -and $entry.licenseUrl) {
+                $url = [string]$entry.licenseUrl
+                if ($url -match "licenses.nuget.org/([^/?#]+)") {
+                    $license = $Matches[1]
+                } else {
+                    $license = $url
+                }
+            }
+        } catch {
+            # Keep Unknown on network/API failures.
+        }
+
+        $nugetLicenseCache[$cacheKey] = $license
+        return $license
+    }
 
     foreach ($targetPath in $Path) {
         if (-not (Test-Path $targetPath)) {
@@ -80,7 +131,7 @@ function Get-LGBinaryLicenseAudit {
                 $complianceDetail += " [MISSING LICENSE/ATTRIBUTION FILE]"
             }
 
-            $results.Add([PSCustomObject]@{
+            Add-LGUniqueResult -Item ([PSCustomObject]@{
                 Name         = "Binary: $($binName)"
                 Version      = $version
                 Publisher    = $company
@@ -150,12 +201,16 @@ function Get-LGBinaryLicenseAudit {
                                             } catch {}
                                         }
 
+                                        if ($license -eq "Unknown") {
+                                            $license = Resolve-LGNuGetLicenseFromApi -PackageId $packageId -Version $pkgVersion
+                                        }
+
                                         $detailText = "NuGet Package: $packageId (Runtime Dependency of $binName)"
                                         if (-not $hasLicenseFile -and $license -ne "Unknown") {
                                             $detailText += " [MISSING PHYSICAL LICENSE FILE]"
                                         }
 
-                                        $results.Add([PSCustomObject]@{
+                                        Add-LGUniqueResult -Item ([PSCustomObject]@{
                                             Name         = "Binary Dependency ($binName): $packageId"
                                             Version      = $pkgVersion
                                             Publisher    = "NuGet"
@@ -200,7 +255,7 @@ function Get-LGBinaryLicenseAudit {
                                 }
                             }
 
-                            $results.Add([PSCustomObject]@{
+                            Add-LGUniqueResult -Item ([PSCustomObject]@{
                                 Name         = "SBOM Dependency ($($sbom.Name)): $compName"
                                 Version      = $compVer
                                 Publisher    = if ($comp.publisher) { $comp.publisher } else { "Unknown" }
